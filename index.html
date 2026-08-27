@@ -2,41 +2,147 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f766e">
-<title>مترجمي — عربي إندونيسي</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#377d76">
+<title>مترجمي عربي - إندونيسي</title>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f3f7f6;color:#17302e}
-.app{max-width:720px;margin:auto;padding:22px 16px 40px}.hero{background:#0f766e;color:white;border-radius:26px;padding:24px 20px;margin-bottom:16px;box-shadow:0 10px 30px #0001}.hero h1{margin:0 0 6px;font-size:27px}.hero p{margin:0;opacity:.9}.switch{display:flex;align-items:center;justify-content:space-between;background:white;border-radius:18px;padding:10px 14px;margin:14px 0}.switch button{border:0;background:#e6f3f1;color:#0f766e;border-radius:12px;padding:10px 14px;font-size:18px}.box{background:white;border-radius:20px;padding:14px;margin:12px 0;box-shadow:0 5px 18px #0000000d}textarea{width:100%;min-height:145px;border:0;outline:0;resize:none;font-size:18px;line-height:1.7}button.main{width:100%;border:0;border-radius:16px;background:#0f766e;color:white;padding:15px;font-size:18px;font-weight:700}button:disabled{opacity:.55}.title{font-weight:800;font-size:18px;margin-bottom:10px}.translation{font-size:22px;font-weight:700;line-height:1.7}.word{display:flex;justify-content:space-between;border-bottom:1px solid #edf1f0;padding:9px 0;gap:20px}.muted{color:#667573}.error{color:#b42318}.example{padding:7px 0}.small{font-size:13px;color:#6a7775;margin-top:10px}
+*{box-sizing:border-box}
+body{margin:0;background:#f3f8f7;font-family:Arial,sans-serif;color:#203a38}
+.app{max-width:720px;margin:auto;padding:22px}
+.hero{background:#377d76;color:white;border-radius:40px;padding:35px 20px;text-align:center;margin-bottom:25px}
+.hero h1{font-size:38px;margin:0 0 12px}
+.hero p{font-size:20px;margin:0}
+.switch{background:white;border-radius:30px;padding:20px;display:flex;justify-content:space-between;align-items:center;font-size:22px;font-weight:bold;margin-bottom:25px}
+#swap{border:0;background:#e5f1ef;border-radius:22px;padding:18px 28px;font-size:25px;color:#377d76}
+.box{background:white;border-radius:30px;padding:20px;margin-bottom:20px}
+textarea{width:100%;height:180px;border:0;outline:0;font-size:22px;resize:none;font-family:Arial;text-align:right}
+.main{width:100%;border:0;background:#377d76;color:white;border-radius:25px;padding:24px;font-size:28px;font-weight:bold}
+.small{margin:18px 5px;text-align:center;color:#607875;font-size:17px}
+#result{display:none}
+.card{background:white;border-radius:25px;padding:20px;margin-top:15px}
+.title{font-size:22px;font-weight:bold;margin-bottom:12px;color:#377d76}
+.word{display:inline-block;background:#edf5f3;padding:8px 12px;border-radius:12px;margin:4px;font-size:18px}
+.error{color:#b33}
 </style>
 </head>
+
 <body>
 <div class="app">
-<section class="hero"><h1>مترجمي 🇸🇦 ↔ 🇮🇩</h1><p>ترجمة + معنى كل كلمة + شرح القاعدة</p></section>
-<div class="switch"><b id="from">العربية</b><button onclick="swap()">⇄</button><b id="to">Bahasa Indonesia</b></div>
-<div class="box"><textarea id="input" placeholder="اكتب الجملة بالعربية..."></textarea></div>
-<button class="main" id="go" onclick="translate()">ترجمة</button>
+
+<section class="hero">
+<h1>مترجمي 🇸🇦 ↔ 🇮🇩</h1>
+<p>ترجمة + معنى كل كلمة + شرح القاعدة</p>
+</section>
+
+<div class="switch">
+<b id="from">العربية</b>
+<button id="swap">⇄</button>
+<b id="to">Bahasa Indonesia</b>
+</div>
+
+<div class="box">
+<textarea id="input" placeholder="اكتب الجملة بالعربية..."></textarea>
+</div>
+
+<button class="main" id="go">ترجمة</button>
+
 <div id="status" class="small"></div>
 <div id="result"></div>
+
 </div>
+
 <script>
-let a2i=true;
-function swap(){a2i=!a2i;from.textContent=a2i?"العربية":"Bahasa Indonesia";to.textContent=a2i?"Bahasa Indonesia":"العربية";input.placeholder=a2i?"اكتب الجملة بالعربية...":"Tulis kalimat dalam bahasa Indonesia...";result.innerHTML=""}
-async function translate(){
- const text=input.value.trim(); if(!text)return;
- status.textContent="جارٍ الترجمة..."; go.disabled=true; result.innerHTML="";
- try{
-  const r=await fetch("/translate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({text,direction:a2i?"Arabic to Indonesian":"Indonesian to Arabic"})});
-  if(!r.ok)throw new Error();
-  const x=await r.json();
-  result.innerHTML=`<div class="box"><div class="title">الترجمة</div><div class="translation">${esc(x.translation)}</div></div>
-  <div class="box"><div class="title">معنى كل كلمة</div>${(x.words||[]).map(w=>`<div class="word"><b>${esc(w.word)}</b><span>${esc(w.meaning)}</span></div>`).join("")}</div>
-  <div class="box"><div class="title">شرح القاعدة</div><div>${esc(x.grammar||"")}</div></div>
-  <div class="box"><div class="title">أمثلة</div>${(x.examples||[]).map(e=>`<div class="example">• ${esc(e)}</div>`).join("")}</div>`;
-  status.textContent="";
- }catch(e){status.innerHTML='<span class="error">تعذر الاتصال بالخادم. بعد نشر الخادم سيعمل المترجم بالذكاء الاصطناعي.</span>'}
- go.disabled=false;
+let arToId=true;
+
+const input=document.getElementById("input");
+const result=document.getElementById("result");
+const status=document.getElementById("status");
+const from=document.getElementById("from");
+const to=document.getElementById("to");
+
+document.getElementById("swap").onclick=()=>{
+ arToId=!arToId;
+ from.textContent=arToId?"العربية":"Bahasa Indonesia";
+ to.textContent=arToId?"Bahasa Indonesia":"العربية";
+ input.placeholder=arToId?"اكتب الجملة بالعربية...":"Tulis kalimat dalam bahasa Indonesia...";
+ input.value="";
+ result.style.display="none";
+};
+
+async function translateText(text,sl,tl){
+ const url="https://translate.googleapis.com/translate_a/single?client=gtx&sl="+sl+"&tl="+tl+"&dt=t&q="+encodeURIComponent(text);
+ const r=await fetch(url);
+ if(!r.ok) throw new Error("translation error");
+ const x=await r.json();
+ return x[0].map(a=>a[0]).join("");
 }
-function esc(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+async function translate(){
+ const text=input.value.trim();
+ if(!text){
+  status.textContent="اكتب جملة أولًا";
+  return;
+ }
+
+ status.textContent="جارٍ الترجمة...";
+ result.style.display="none";
+
+ try{
+  const sl=arToId?"ar":"id";
+  const tl=arToId?"id":"ar";
+
+  const translated=await translateText(text,sl,tl);
+
+  const words=translated
+    .replace(/[.,!?،؛:()[\]"']/g," ")
+    .split(/\s+/)
+    .filter(Boolean);
+
+  let html="";
+  html+="<div class='card'>";
+  html+="<div class='title'>الترجمة</div>";
+  html+="<div style='font-size:25px;line-height:1.7'>"+translated+"</div>";
+  html+="</div>";
+
+  html+="<div class='card'>";
+  html+="<div class='title'>معنى الكلمات</div>";
+  html+="<div id='words'>جارٍ استخراج معنى الكلمات...</div>";
+  html+="</div>";
+
+  html+="<div class='card'>";
+  html+="<div class='title'>شرح القاعدة</div>";
+  if(arToId){
+   html+="<div style='font-size:19px;line-height:1.7'>في اللغة الإندونيسية غالبًا يأتي الفاعل قبل الفعل، ولا تتغير الأفعال حسب الزمن مثل العربية. يتم التعبير عن الزمن غالبًا بكلمات مثل <b>sudah</b> للماضي و<b>akan</b> للمستقبل و<b>sedang</b> للحدث الجاري.</div>";
+  }else{
+   html+="<div style='font-size:19px;line-height:1.7'>في هذه الجملة نترجم المعنى إلى العربية مع مراعاة ترتيب الكلمات والمعنى المقصود في اللغة الإندونيسية.</div>";
+  }
+  html+="</div>";
+
+  result.innerHTML=html;
+  result.style.display="block";
+
+  const wordBox=document.getElementById("words");
+  let out="";
+
+  for(const w of words.slice(0,12)){
+   try{
+    const meaning=await translateText(w,tl,sl);
+    out+="<span class='word'><b>"+w+"</b> = "+meaning+"</span>";
+   }catch(e){
+    out+="<span class='word'>"+w+"</span>";
+   }
+  }
+
+  wordBox.innerHTML=out;
+
+  status.textContent="تمت الترجمة ✓";
+
+ }catch(e){
+  status.innerHTML="<span class='error'>حدث خطأ. تأكد من اتصال الإنترنت ثم حاول مرة أخرى.</span>";
+ }
+}
+
+document.getElementById("go").onclick=translate;
 </script>
-</body></html>
+</body>
+</html>
